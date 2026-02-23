@@ -2,8 +2,19 @@
 // any routes, middleware, settings belong here
 
 const express = require("express");
-const { middlewareThatEndsEarly, exampleMiddleware, otherExample, doCrazierMath, doCrazyMath } = require("./middleware/exampleMiddleware");
+const {
+  middlewareThatEndsEarly,
+  exampleMiddleware,
+  otherExample,
+  doCrazierMath,
+  doCrazyMath,
+} = require("./middleware/exampleMiddleware");
+const { body, validationResult } = require("express-validator");
 const app = express();
+
+// app.use is syntax for middleware
+//"on every route, do this"
+app.use(express.json());
 
 // GET http://localhost:3000/
 app.get("/", (request, response) => {
@@ -34,11 +45,10 @@ function exampleFunction() {
   )
 */
 
-
 app.get(
-  "/middlewareExample", (request, response, next) => {
-    console.log("middleware activated!"),
-    next();
+  "/middlewareExample",
+  (request, response, next) => {
+    (console.log("middleware activated!"), next());
   },
   exampleMiddleware,
   otherExample,
@@ -48,11 +58,10 @@ app.get(
 
   (request, response) => {
     response.json({
-      message: "Middleware route has completed!"
-    })
-  }
-)
-
+      message: "Middleware route has completed!",
+    });
+  },
+);
 
 // THIS IS ONE METHOD
 // app.get(
@@ -87,23 +96,46 @@ emailUser(),
 );
 */
 
-// user register account
-// POST to /users/register
+// POST http://localhost:3000/users/register
 // body data = {email, password}
-app.post("/users/register",
+// do not save username and password as query strings
+app.post(
+  "/users/register",
   // validate incoming email address
+  // use packages for this
+  body('email').isEmail().normalizeEmail(),
   // validate incoming password
-  // create user in db
-  // create jwts
-  
-  (request, response) => {
-    response.json({
-      message: "Successful registration",
-      data: request.user
-    })
-  }
+  // create user in DB
+  // create JWTs
+  (request, response, next) => {
+    const errors = validationResult(request);
+    if (!errors.isEmpty()){
+      console.log(errors);
+      return next(new Error(JSON.stringify(errors)));
+    }
 
-)
+    console.log(request.body.email)
+    response.json({
+      message: "Successful user registration happened here! Believe us!",
+      data: request.user,
+    });
+  },
+);
+
+app.use((error, request, response, next) => {
+  // check request.body.errors for any errors
+  
+  if (request.body.errors || error.toString()){
+    console.log("Errors occurred!")
+  }
+  // send the errors to your company's logging/analytics platform
+  // send a request to a fallback server to warm it up
+
+  // send request.body.errors as a response
+  response.json({
+    errors: request.body.errors || error.message
+  })
+});
 
 module.exports = {
   app,
