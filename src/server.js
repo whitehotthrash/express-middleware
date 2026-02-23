@@ -2,7 +2,7 @@
 // any routes, middleware, settings belong here
 
 const express = require("express");
-const { middlewareThatEndsEarly, exampleMiddleware, otherExample } = require("./middleware/exampleMiddleware");
+const { middlewareThatEndsEarly, exampleMiddleware, otherExample, doCrazierMath, doCrazyMath } = require("./middleware/exampleMiddleware");
 const app = express();
 
 // GET http://localhost:3000/
@@ -42,7 +42,9 @@ app.get(
   },
   exampleMiddleware,
   otherExample,
-  middlewareThatEndsEarly,
+  //middlewareThatEndsEarly,
+  //doCrazyMath,
+  doCrazierMath,
 
   (request, response) => {
     response.json({
@@ -84,6 +86,24 @@ emailUser(),
   }
 );
 */
+
+// user register account
+// POST to /users/register
+// body data = {email, password}
+app.post("/users/register",
+  // validate incoming email address
+  // validate incoming password
+  // create user in db
+  // create jwts
+  
+  (request, response) => {
+    response.json({
+      message: "Successful registration",
+      data: request.user
+    })
+  }
+
+)
 
 module.exports = {
   app,
